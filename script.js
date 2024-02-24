@@ -87,6 +87,21 @@ document.getElementById("submit").addEventListener("click", function() {
   // Store the score in local storage
   localStorage.setItem("score", score);
 });
+describe('Your Test Suite Description', () => {
+  it('Should perform the desired action', () => {
+    // Visit the page
+    cy.visit('your_page_url');
 
-cy.get('#questions', { timeout: 10000 }).should('be.visible');
+    // Wait for the div with id 'questions' to be available
+    cy.get('#questions', { timeout: 10000 }).should('be.visible');
+
+    // Perform your test actions
+    // For example, interact with the questions if needed
+    // cy.get('#questions').find('some-selector').click();
+
+    // Continue with your test assertions and actions
+  });
+});
+
+
 
