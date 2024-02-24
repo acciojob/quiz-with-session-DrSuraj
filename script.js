@@ -87,3 +87,6 @@ document.getElementById("submit").addEventListener("click", function() {
   // Store the score in local storage
   localStorage.setItem("score", score);
 });
+
+cy.get('#questions', { timeout: 10000 }).should('be.visible');
+
