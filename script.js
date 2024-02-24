@@ -1,107 +1,88 @@
-// Quiz questions
-const questions = [
-  {
-    question: "What is the capital of France?",
-    choices: ["Paris", "London", "Berlin", "Madrid"],
-    answer: "Paris",
-  },
-  {
-    question: "What is the highest mountain in the world?",
-    choices: ["Everest", "Kilimanjaro", "Denali", "Matterhorn"],
-    answer: "Everest",
-  },
-  {
-    question: "What is the largest country by area?",
-    choices: ["Russia", "China", "Canada", "United States"],
-    answer: "Russia",
-  },
-  {
-    question: "Which is the largest planet in our solar system?",
-    choices: ["Earth", "Jupiter", "Mars"],
-    answer: "Jupiter",
-  },
-  {
-    question: "What is the capital of Canada?",
-    choices: ["Toronto", "Montreal", "Vancouver", "Ottawa"],
-    answer: "Ottawa",
-  },
-];
+document.addEventListener('DOMContentLoaded', function() {
+  const questions = [
+    {
+      question: 'What is the capital of France?',
+      options: ['Paris', 'London', 'Rome', 'Berlin'],
+      answer: 'Paris'
+    },
+    {
+      question: 'What is 2 + 2?',
+      options: ['3', '4', '5', '6'],
+      answer: '4'
+    },
+    {
+      question: 'Which planet is known as the Red Planet?',
+      options: ['Jupiter', 'Mars', 'Venus', 'Saturn'],
+      answer: 'Mars'
+    },
+    {
+      question: 'Who wrote "Romeo and Juliet"?',
+      options: ['Charles Dickens', 'Jane Austen', 'William Shakespeare', 'Mark Twain'],
+      answer: 'William Shakespeare'
+    },
+    {
+      question: 'What is the tallest mammal?',
+      options: ['Giraffe', 'Elephant', 'Rhino', 'Horse'],
+      answer: 'Giraffe'
+    }
+  ];
 
-// Check if session storage is supported
-if (typeof(Storage) !== "undefined") {
-  // Retrieve user progress from session storage
-  var userAnswers = JSON.parse(sessionStorage.getItem("progress")) || [];
-} else {
-  console.error("Sorry, your browser does not support session storage.");
-}
+  const quizForm = document.getElementById('quiz-form');
+  const questionsList = document.getElementById('questions-list');
+  const scoreDisplay = document.getElementById('score-display');
 
-const questionsElement = document.getElementById("questions");
+  function renderQuestions() {
+    questions.forEach((question, index) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <h3>${question.question}</h3>
+        <ul>
+          ${question.options.map(option => `<li><input type="radio" name="question${index}" value="${option}" ${getOptionStatus(index, option)}>${option}</li>`).join('')}
+        </ul>
+      `;
+      questionsList.appendChild(li);
+    });
+  }
 
-// Display the quiz questions and choices
-function renderQuestions() {
-  for (let i = 0; i < questions.length; i++) {
-    const question = questions[i];
-    const questionElement = document.createElement("div");
-    const questionText = document.createTextNode(question.question);
-    questionElement.appendChild(questionText);
+  function getOptionStatus(index, option) {
+    const progress = JSON.parse(sessionStorage.getItem('progress'));
+    return progress && progress[index] === option ? 'checked' : '';
+  }
 
-    for (let j = 0; j < question.choices.length; j++) {
-      const choice = question.choices[j];
-      const choiceElement = document.createElement("input");
-      choiceElement.setAttribute("type", "radio");
-      choiceElement.setAttribute("name", `question-${i}`);
-      choiceElement.setAttribute("value", choice);
-      choiceElement.addEventListener("change", function() {
-        // Update userAnswers in session storage on option selection
-        userAnswers[i] = this.value;
-        sessionStorage.setItem("progress", JSON.stringify(userAnswers));
+  function saveProgress() {
+    const inputs = document.querySelectorAll('input[type="radio"]:checked');
+    const progress = Array.from(inputs).reduce((acc, input) => {
+      const questionIndex = input.name.replace('question', '');
+      acc[questionIndex] = input.value;
+      return acc;
+    }, {});
+    sessionStorage.setItem('progress', JSON.stringify(progress));
+  }
+
+  function calculateScore() {
+    const progress = JSON.parse(sessionStorage.getItem('progress'));
+    let score = 0;
+    if (progress) {
+      questions.forEach((question, index) => {
+        if (progress[index] === question.answer) {
+          score++;
+        }
       });
-
-      if (userAnswers[i] === choice) {
-        choiceElement.setAttribute("checked", true);
-      }
-
-      const choiceText = document.createTextNode(choice);
-      questionElement.appendChild(choiceElement);
-      questionElement.appendChild(choiceText);
     }
-
-    questionsElement.appendChild(questionElement);
-  }
-}
-renderQuestions();
-
-// Submit button event handler
-document.getElementById("submit").addEventListener("click", function() {
-  // Calculate the user's score
-  let score = 0;
-  for (let i = 0; i < questions.length; i++) {
-    if (userAnswers[i] === questions[i].answer) {
-      score++;
-    }
+    return score;
   }
 
-  // Display the score
-  alert(`Your score is ${score} out of 5.`);
+  function displayScore() {
+    const score = calculateScore();
+    scoreDisplay.textContent = `Your score is ${score} out of ${questions.length}.`;
+    localStorage.setItem('score', score);
+  }
 
-  // Store the score in local storage
-  localStorage.setItem("score", score);
-});
-describe('Your Test Suite Description', () => {
-  it('Should perform the desired action', () => {
-    // Visit the page
-    cy.visit('your_page_url');
-
-    // Wait for the div with id 'questions' to be available
-    cy.get('#questions', { timeout: 10000 }).should('be.visible');
-
-    // Perform your test actions
-    // For example, interact with the questions if needed
-    // cy.get('#questions').find('some-selector').click();
-
-    // Continue with your test assertions and actions
+  quizForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    saveProgress();
+    displayScore();
   });
+
+  renderQuestions();
 });
-
-
-
